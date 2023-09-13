@@ -17,8 +17,15 @@ public class MemberDto {
         private String name;
         @NotNull
         private String password;
+        @NotNull
+        private Boolean agreeToTerms;
         // todo 패스워드 vaild추가
+
+        public Post() {
+        }
     }
+
+
 
     @Getter
     @AllArgsConstructor
