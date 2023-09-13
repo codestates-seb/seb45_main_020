@@ -39,6 +39,9 @@ public class Member {
     private String profileImageUrl =
             "https://main20-pathfinder.s3.ap-northeast-2.amazonaws.com/profileimage.png";   // 기본 이미지
 
+    @Column(nullable = false)
+    private Boolean agreeToTerms = false;
+
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<Recommend> recommends = new ArrayList<>();
 
@@ -59,6 +62,20 @@ public class Member {
         }
     }
 
+    // 일반 회원가입
+    public static Member createMember(String email, String name, String password, boolean agreeToTerms) {
+        return Member.builder()
+                .email(email)
+                .name(name)
+                .password(password)
+                .introduce("안녕하세요")
+                .authority(Authority.ROLE_USER)
+                .profileImageUrl("https://main20-pathfinder.s3.ap-northeast-2.amazonaws.com/profileimage.png")
+                .agreeToTerms(agreeToTerms)
+                .build();
+    }
+
+    // oauth2 회원가입
     public static Member createMember(String email, String name, String password) {
         return Member.builder()
                 .email(email)
@@ -67,6 +84,7 @@ public class Member {
                 .introduce("안녕하세요")
                 .authority(Authority.ROLE_USER)
                 .profileImageUrl("https://main20-pathfinder.s3.ap-northeast-2.amazonaws.com/profileimage.png")
+                .agreeToTerms(true)
                 .build();
     }
 }
