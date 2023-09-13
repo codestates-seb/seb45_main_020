@@ -17,6 +17,23 @@ spring:
     servlet:
       encoding:
         force-response: true
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: hytest248@gmail.com
+    password: zspgpkkwaieegdq
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+    auth-code-expiration-millis: 300000  # 5분
+    email-complete-expiration-millis: 3600000  # 1시간
   security:
     oauth2:
       client:
@@ -24,15 +41,15 @@ spring:
           google:
             clientId: ${G_CLIENT_ID}
             clientSecret: ${G_CLIENT_SECRET}
-            redirect-uri: http://seb45-main-020.s3-website.ap-northeast-2.amazonaws.com
+            redirect-uri: https://localhost:8080/auth/google/callback
           github:
             clientId: ${GIT_CLIENT_ID}
             clientSecret: ${GIT_CLIENT_SECRET}
-            redirect-uri: http://seb45-main-020.s3-website.ap-northeast-2.amazonaws.com
+            redirect-uri: https://localhost:8080/auth/github/callback
           kakao:
             clientId: ${K_CLIENT_ID}
             clientSecret: ${K_CLIENT_SECRET}
-            redirect-uri: http://seb45-main-020.s3-website.ap-northeast-2.amazonaws.com
+            redirect-uri: https://localhost:8080/auth/kakao/callback
 jwt:
   secret-key: ${JWT_SECRET_KEY}
   access-token-expire-time: 7200000
@@ -54,7 +71,7 @@ open-api:
     credentials:
       service-key: ${TOURAPI_SERVICEKEY}
 backend:
-  base-url: ec2-43-202-120-133.ap-northeast-2.compute.amazonaws.com
+  base-url: http://ec2-43-202-120-133.ap-northeast-2.compute.amazonaws.com
 
 frontend:
   base-url: http://seb45-main-020.s3-website.ap-northeast-2.amazonaws.com
@@ -68,16 +85,16 @@ spring:
         registration:
           google:
             scope: email
-            redirect-uri: http://seb45-main-020.s3-website.ap-northeast-2.amazonaws.com
+            redirect-uri: https://localhost:8080/auth/google/callback
           github:
             scope: user:email, read:user
-            redirect-uri: http://seb45-main-020.s3-website.ap-northeast-2.amazonaws.com
+            redirect-uri: https://localhost:8080/auth/github/callback
           kakao:
             client-authentication-method: POST
             authorization-grant-type: authorization_code
             scope: profile_nickname, account_email
             client-name: Kakao
-            redirect-uri: http://seb45-main-020.s3-website.ap-northeast-2.amazonaws.com
+            redirect-uri: https://localhost:8080/auth/kakao/callback
         provider:
           kakao:
             authorization-uri: https://kauth.kakao.com/oauth/authorize
