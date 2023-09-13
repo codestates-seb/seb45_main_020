@@ -54,7 +54,8 @@ public class SecurityConfig {
                 .formLogin().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .cors(getCorsConfigurerCustomizer());
+                .cors(getCorsConfigurerCustomizer())
+                .headers().frameOptions().disable();
 
         httpSecurity
                 .apply(new CustomFilterConfigurer());
@@ -88,6 +89,7 @@ public class SecurityConfig {
                 .antMatchers(HttpMethod.POST, "/member/email/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/diary/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/tag/**").permitAll()
+                .antMatchers("/**").permitAll()
                 .anyRequest().authenticated();
     }
 
