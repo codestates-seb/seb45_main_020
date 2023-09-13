@@ -39,9 +39,14 @@ public class DiaryDto {
         private String area1;
         private String area2;
         private Long recommendedCount;
+//        private Long scrapCount;
         private Integer views;
         private LocalDateTime createdAt;
         private LocalDateTime modifiedAt;
+        private boolean isRecommend;
+        public void setRecommend(boolean isRecommend) {
+            this.isRecommend = isRecommend;
+        }
     }
 
 

@@ -11,7 +11,8 @@ public enum ExceptionCode {
 
     // Diary 관련 예외
     DIARY_NOT_FOUND(404, "Diary not found"),
-    QUESTION_EDIT_UNAUTHORIZED(403, "Unauthorized Quesiton edit"),
+    DIARY_EDIT_UNAUTHORIZED(403, "Unauthorized Diary edit"),
+    DIARY_DELETE_UNAUTHORIZED(403, "Unauthorized Diary edit"),
 
     // Reward 관련 예외
     REWARD_NOT_FOUND(404, "Reward not found"),

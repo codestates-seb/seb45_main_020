@@ -1,5 +1,6 @@
 package com.pathfinder.server.diary.service;
 
+import com.pathfinder.server.auth.utils.SecurityUtil;
 import com.pathfinder.server.member.entity.Member;
 import com.pathfinder.server.member.service.MemberService;
 import com.pathfinder.server.diary.entity.Diary;
@@ -34,21 +35,27 @@ public class DiaryService {
 
     public Diary updateDiary(Diary diary){
         Diary findDiary = findVerifiedDiary(diary.getDiaryId());
-        Optional.ofNullable(diary.getTitle())
-                .ifPresent(title -> findDiary.setTitle(title));
-        Optional.ofNullable(diary.getContent())
-                .ifPresent(content -> findDiary.setContent(content));
-        Optional.ofNullable(diary.getArea1())
-                .ifPresent(area1 -> findDiary.setArea1(area1));
-        Optional.ofNullable(diary.getArea2())
-                .ifPresent(area2 -> findDiary.setArea2(area2));
-        return diaryRepository.save(findDiary);
+
+        if(verifyIdentification(findDiary)){
+            Optional.ofNullable(diary.getTitle())
+                    .ifPresent(title -> findDiary.setTitle(title));
+            Optional.ofNullable(diary.getContent())
+                    .ifPresent(content -> findDiary.setContent(content));
+            Optional.ofNullable(diary.getArea1())
+                    .ifPresent(area1 -> findDiary.setArea1(area1));
+            Optional.ofNullable(diary.getArea2())
+                    .ifPresent(area2 -> findDiary.setArea2(area2));
+            return diaryRepository.save(findDiary);
+        }
+        else {
+            throw new BusinessLogicException(ExceptionCode.DIARY_EDIT_UNAUTHORIZED);
+        }
     }
 
     public Diary getDiary(Long diaryId){
         Diary findDiary = findVerifiedDiary(diaryId);
         findDiary.setViews(findDiary.getViews() + 1); // 조회수 증가
-        findDiary.setRecommendedCount(findDiary.getRecommends().stream().count());
+        findDiary.setRecommendedCount(findDiary.getRecommends().stream().count()); //추천수 증가
 
         return diaryRepository.save(findDiary);
     }
@@ -71,8 +78,12 @@ public class DiaryService {
 
     public void deleteDiary(Long diaryId) {
         Diary findDiary = findVerifiedDiary(diaryId);
-
-        diaryRepository.delete(findDiary);
+        if(verifyIdentification(findDiary)){
+            diaryRepository.delete(findDiary);
+        }
+        else {
+            throw new BusinessLogicException(ExceptionCode.DIARY_DELETE_UNAUTHORIZED);
+        }
     }
 
     public Diary findVerifiedDiary(Long diaryId) {
@@ -86,4 +97,11 @@ public class DiaryService {
         findUser.setDiaryCount(findUser.getDiaryCount() + 1);
         rewardService.unlockRewards(findUser,findUser.getRewards());
     }
+    public boolean verifyIdentification(Diary diary) {
+        if(diary.getMember().getMemberId() == SecurityUtil.getCurrentId()) {
+            return true;
+        }
+        return false;
+    }
+
 }
