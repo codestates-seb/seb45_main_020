@@ -41,15 +41,15 @@ spring:
           google:
             clientId: ${G_CLIENT_ID}
             clientSecret: ${G_CLIENT_SECRET}
-            redirect-uri: https://localhost:8080/auth/google/callback
+            redirect-uri: http://seb45-main-020.s3-website.ap-northeast-2.amazonaws.com/oauth2/google
           github:
             clientId: ${GIT_CLIENT_ID}
             clientSecret: ${GIT_CLIENT_SECRET}
-            redirect-uri: https://localhost:8080/auth/github/callback
+            redirect-uri: http://seb45-main-020.s3-website.ap-northeast-2.amazonaws.com/oauth2/github
           kakao:
             clientId: ${K_CLIENT_ID}
             clientSecret: ${K_CLIENT_SECRET}
-            redirect-uri: https://localhost:8080/auth/kakao/callback
+            redirect-uri: http://seb45-main-020.s3-website.ap-northeast-2.amazonaws.com/oauth2/kakao
 jwt:
   secret-key: ${JWT_SECRET_KEY}
   access-token-expire-time: 7200000
@@ -85,16 +85,16 @@ spring:
         registration:
           google:
             scope: email
-            redirect-uri: https://localhost:8080/auth/google/callback
+            redirect-uri: http://seb45-main-020.s3-website.ap-northeast-2.amazonaws.com/oauth2/google
           github:
             scope: user:email, read:user
-            redirect-uri: https://localhost:8080/auth/github/callback
+            redirect-uri: http://seb45-main-020.s3-website.ap-northeast-2.amazonaws.com/oauth2/github
           kakao:
             client-authentication-method: POST
             authorization-grant-type: authorization_code
             scope: profile_nickname, account_email
             client-name: Kakao
-            redirect-uri: https://localhost:8080/auth/kakao/callback
+            redirect-uri: http://seb45-main-020.s3-website.ap-northeast-2.amazonaws.com/oauth2/kakao
         provider:
           kakao:
             authorization-uri: https://kauth.kakao.com/oauth/authorize
