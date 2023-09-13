@@ -42,6 +42,7 @@ public class DiaryDto {
         private Integer views;
         private LocalDateTime createdAt;
         private LocalDateTime modifiedAt;
+        private boolean isRecommend;
     }
 
 

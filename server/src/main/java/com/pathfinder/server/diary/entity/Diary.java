@@ -42,6 +42,9 @@ public class Diary extends Auditable {
     @Column
     private int views;
 
+    @Column
+    private boolean isRecommend;
+
     @ManyToOne
     @JoinColumn(name = "MEMBER_ID")
     private Member member;
@@ -51,6 +54,10 @@ public class Diary extends Auditable {
 
     public void setMember(Member member) {
         this.member = member;
+    }
+
+    public void setRecommend(boolean isRecommend) {
+        this.isRecommend = isRecommend;
     }
 
     public void setRecommend(Recommend recommend) {
