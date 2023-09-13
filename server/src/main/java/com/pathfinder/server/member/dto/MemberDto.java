@@ -5,6 +5,7 @@ import lombok.Getter;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 public class MemberDto {
     @Getter
@@ -16,6 +17,7 @@ public class MemberDto {
         @NotNull
         private String name;
         @NotNull
+        @Size(min = 8)
         private String password;
         @NotNull
         private Boolean agreeToTerms;

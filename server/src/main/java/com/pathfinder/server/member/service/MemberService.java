@@ -6,6 +6,7 @@ import com.pathfinder.server.exception.BusinessLogicException;
 import com.pathfinder.server.exception.ExceptionCode;
 import com.pathfinder.server.global.exception.emailexception.EmailAuthNotAttemptException;
 import com.pathfinder.server.global.exception.emailexception.EmailAuthNotCompleteException;
+import com.pathfinder.server.global.exception.memberexception.MemberNotAgreeToTerms;
 import com.pathfinder.server.global.exception.memberexception.MemberNotFoundException;
 import com.pathfinder.server.member.dto.MemberDto;
 import com.pathfinder.server.member.entity.Member;
@@ -46,9 +47,6 @@ public class MemberService {
     public Long signup(MemberDto.Post request) {
 
         verifyExistsEmail(request.getEmail());
-
-        verifyExistsName(request.getName());
-
         checkEmailAuthComplete(request.getEmail());
 
         if (!request.getAgreeToTerms()) {
@@ -64,7 +62,8 @@ public class MemberService {
         return Member.createMember(
                 request.getEmail(),
                 request.getName(),
-                passwordEncoder.encode(request.getPassword())
+                passwordEncoder.encode(request.getPassword()),
+                request.getAgreeToTerms()
         );
     }
 
@@ -102,6 +101,10 @@ public class MemberService {
         Member findMember =
                 optionalMember.orElseThrow(() ->
                         new BusinessLogicException(ExceptionCode.USER_NOT_FOUND));
+
+        if (!findMember.getAgreeToTerms()) {    // 회원가입 약관 미동의 계정
+            new MemberNotAgreeToTerms();
+        }
         return findMember;
     }
 
