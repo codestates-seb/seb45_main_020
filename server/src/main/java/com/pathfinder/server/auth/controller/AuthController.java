@@ -3,7 +3,10 @@ package com.pathfinder.server.auth.controller;
 import com.pathfinder.server.auth.controller.dto.AuthLoginApiRequest;
 import com.pathfinder.server.auth.jwt.dto.Token;
 import com.pathfinder.server.auth.oauth.OAuthService;
+import com.pathfinder.server.global.response.ApiSingleResponse;
 import com.pathfinder.server.member.dto.MemberDto;
+import com.pathfinder.server.member.dto.MemberMailAuthApiRequest;
+import com.pathfinder.server.member.dto.MemberMailConfirmApiRequest;
 import com.pathfinder.server.member.service.MemberService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -63,15 +66,29 @@ public class AuthController {
         return ResponseEntity.created(uri).build();
     }
 
-//     비밀번호 찾기 구현
-//    @PatchMapping("/password")
-//    public ResponseEntity<Void> findPassword() {
-//    }
-//
-//     이메일 전송 기능 구현
-//    @PostMapping("/email")
-//    public ResponseEntity<Void> sendEmail() {
-//    }
+    @PostMapping("/email")
+    public ResponseEntity<Void> sendEmail(@RequestBody @Valid MemberMailAuthApiRequest request) {
+
+        memberService.sendFindPasswordCodeToEmail(request.getEmail());
+
+        return ResponseEntity.noContent().build();
+    }
 
 
+    @PostMapping("/email/confirm")
+    public ResponseEntity<ApiSingleResponse<Boolean>> confirmEmail(@RequestBody @Valid MemberMailConfirmApiRequest request) {
+
+        boolean result = memberService.checkCode(request.getEmail(), request.getCode());
+
+        return ResponseEntity.ok(ApiSingleResponse.ok(result));
+    }
+
+    @GetMapping("/error") //error 로깅 테스트용
+    public ResponseEntity<Void> error() {
+        log.error("error");
+
+        RuntimeException error = new RuntimeException("error");
+        error.printStackTrace();
+        throw error;
+    }
 }
