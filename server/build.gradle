@@ -44,7 +44,6 @@ dependencies {
 	implementation 'mysql:mysql-connector-java:8.0.33'
 	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
 }
-// 삭제
-tasks.named('test') {
-	useJUnitPlatform()
+jar {
+	enabled = false
 }

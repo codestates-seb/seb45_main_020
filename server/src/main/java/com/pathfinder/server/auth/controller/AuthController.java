@@ -1,8 +1,8 @@
 package com.pathfinder.server.auth.controller;
 
-import com.pathfinder.server.auth.controller.dto.AuthLoginApiRequest;
 import com.pathfinder.server.auth.jwt.dto.Token;
 import com.pathfinder.server.auth.oauth.OAuthService;
+import com.pathfinder.server.auth.oauth.Provider;
 import com.pathfinder.server.member.dto.MemberDto;
 import com.pathfinder.server.member.service.MemberService;
 import lombok.extern.slf4j.Slf4j;
@@ -34,8 +34,8 @@ public class AuthController {
 
     // 로그인한 회원의 memberId와 함께 발급한 토큰 정보를 헤더로 반환
     @GetMapping("/oauth")
-    public ResponseEntity<String> login(@ModelAttribute @Valid AuthLoginApiRequest request) {
-        Token token = oAuthService.login(request.getProvider(), request.getCode());
+    public ResponseEntity<String> login(Provider provider, String code) {
+        Token token = oAuthService.login(provider, code);
 
         HttpHeaders tokenHeader = getHttpHeaders(token);
 

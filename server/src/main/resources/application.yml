@@ -1,7 +1,7 @@
 spring:
   profiles:
     include: secret
-    active: local # 배포시 prod로 변환
+    active: prod
   servlet:  # S3 이미지 업로드 제한
     multipart:
       enabled: true

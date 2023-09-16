@@ -30,7 +30,7 @@ public class TourInfoService {
 
         Collections.shuffle(results);
 
-        return results.stream().limit(5).collect(Collectors.toList());
+        return results.stream().limit(6).collect(Collectors.toList());
     }
 
 }

@@ -44,6 +44,9 @@ public class Member {
     @Column(nullable = false)
     private int diaryCount;
 
+    @Column(nullable = false)
+    private Boolean agreeToTerms;   // todo 미동의 회원 사용불가 처리
+
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<Recommend> recommends = new ArrayList<>();
 
@@ -84,6 +87,21 @@ public class Member {
         }
     }
 
+    // 일반 회원가입
+    public static Member createMember(String email, String name, String password, boolean agreeToTerms) {
+        return Member.builder()
+                .email(email)
+                .name(name)
+                .password(password)
+                .introduce("안녕하세요")
+                .authority(Authority.ROLE_USER)
+                .profileImageUrl("https://main20-pathfinder.s3.ap-northeast-2.amazonaws.com/profileimage.png")
+                .diaryCount(0)
+                .agreeToTerms(agreeToTerms)
+                .build();
+    }
+
+    // oauth2 회원가입
     public static Member createMember(String email, String name, String password) {
         return Member.builder()
                 .email(email)
@@ -93,6 +111,7 @@ public class Member {
                 .authority(Authority.ROLE_USER)
                 .profileImageUrl("https://main20-pathfinder.s3.ap-northeast-2.amazonaws.com/profileimage.png")
                 .diaryCount(0)
+                .agreeToTerms(true)
                 .build();
     }
 }
