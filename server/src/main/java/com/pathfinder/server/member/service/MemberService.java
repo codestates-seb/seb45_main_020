@@ -1,11 +1,7 @@
 package com.pathfinder.server.member.service;
 
-import com.pathfinder.server.email.service.DataService;
-import com.pathfinder.server.email.service.MailService;
 import com.pathfinder.server.exception.BusinessLogicException;
 import com.pathfinder.server.exception.ExceptionCode;
-import com.pathfinder.server.global.exception.emailexception.EmailAuthNotAttemptException;
-import com.pathfinder.server.global.exception.emailexception.EmailAuthNotCompleteException;
 import com.pathfinder.server.global.exception.memberexception.MemberNotAgreeToTerms;
 import com.pathfinder.server.global.exception.memberexception.MemberNotFoundException;
 import com.pathfinder.server.member.dto.MemberDto;
@@ -25,23 +21,12 @@ import java.util.Optional;
 public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
-    private final MailService mailService;
-    private final DataService dataService;
-
-    private static final String AUTH_CODE_PREFIX = "AuthCode ";
-    @Value("${spring.mail.auth-code-expiration-millis}")
-    private long authCodeExpirationMillis;
-    @Value("${spring.mail.email-complete-expiration-millis}")
-    private long emailCompleteExpirationMillis;
 
     public MemberService(MemberRepository memberRepository,
-                         PasswordEncoder passwordEncoder,
-                         MailService mailService,
-                         DataService dataService) {
+                         PasswordEncoder passwordEncoder) {
         this.memberRepository = memberRepository;
         this.passwordEncoder = passwordEncoder;
-        this.mailService = mailService;
-        this.dataService = dataService;
+
     }
     @Transactional
     public Long signup(MemberDto.Post request) {
@@ -107,73 +92,10 @@ public class MemberService {
         return findMember;
     }
 
-    private void verifyExistsName(String name) {
-        Optional<Member> member = memberRepository.findByName(name);
-        if (member.isPresent()) {
-            throw new BusinessLogicException(ExceptionCode.NAME_EXISTS);
-        }
-    }
-
     private void verifyExistsEmail(String email) {
         Optional<Member> member = memberRepository.findByEmail(email);
         if (member.isPresent()) {
             throw new BusinessLogicException(ExceptionCode.EMAIL_EXISTS);
         }
-    }
-
-    public boolean checkCode(String toEmail, String givenCode) {
-
-        boolean isValid = checkCodeValid(toEmail, givenCode);
-
-        if(isValid) {
-            saveTrueInRedis(toEmail);
-        }
-
-        return isValid;
-    }
-
-    private boolean checkCodeValid(String toEmail, String givenCode){
-
-        String savedCode = dataService.getValues(AUTH_CODE_PREFIX + toEmail);
-
-        if(savedCode == null) throw new EmailAuthNotAttemptException();
-
-        return savedCode.equals(givenCode);
-    }
-
-    private void saveTrueInRedis(String toEmail) {
-        dataService.saveValues(
-                AUTH_CODE_PREFIX + toEmail,
-                "true",
-                Duration.ofMillis(emailCompleteExpirationMillis));
-    }
-
-    public void sendFindPasswordCodeToEmail(String toEmail) {
-
-        verifiedMember(toEmail);
-
-        String authCode = mailService.sendAuthEmail(toEmail);
-
-        saveCodeInRedis(toEmail, authCode);
-    }
-
-    private Member verifiedMember(String email) {
-        return memberRepository.findByEmail(email)
-                .orElseThrow(MemberNotFoundException::new);
-    }
-
-    private void saveCodeInRedis(String toEmail, String authCode) {
-        dataService.saveValues(
-                AUTH_CODE_PREFIX + toEmail,
-                authCode,
-                Duration.ofMillis(authCodeExpirationMillis));
-    }
-
-    private void checkEmailAuthComplete(String email) {
-        if(dataService.getValues(AUTH_CODE_PREFIX + email) == null || !dataService.getValues(AUTH_CODE_PREFIX + email).equals("true")){
-            throw new EmailAuthNotCompleteException();
-        }
-
-        dataService.deleteValues(AUTH_CODE_PREFIX + email);
     }
 }
