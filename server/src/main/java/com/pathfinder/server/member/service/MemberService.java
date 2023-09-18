@@ -47,7 +47,6 @@ public class MemberService {
     public Long signup(MemberDto.Post request) {
 
         verifyExistsEmail(request.getEmail());
-        checkEmailAuthComplete(request.getEmail());
 
         if (!request.getAgreeToTerms()) {
             throw new IllegalArgumentException("약관에 동의해야 회원 가입이 가능합니다.");
