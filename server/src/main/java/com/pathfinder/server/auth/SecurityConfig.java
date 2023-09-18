@@ -1,6 +1,10 @@
 package com.pathfinder.server.auth;
 
 import com.pathfinder.server.auth.jwt.service.TokenProvider;
+import com.pathfinder.server.member.dto.MemberDto;
+import com.pathfinder.server.member.entity.Member;
+import com.pathfinder.server.member.repository.MemberRepository;
+import com.pathfinder.server.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -33,6 +37,7 @@ import static com.pathfinder.server.auth.utils.AuthConstant.*;
 public class SecurityConfig {
 
     private final TokenProvider tokenProvider;
+    private final MemberRepository memberRepository;
 
     @Value("${frontend.base-url}")
     private String frontBaseUrl;
@@ -68,6 +73,10 @@ public class SecurityConfig {
 
         httpSecurity.authorizeRequests(getAuthorizeRequestsCustomizer());
 
+        // 관리자 계정 생성
+        MemberDto.AdminPost adminAccount = new MemberDto.AdminPost("pathfinder248@admin.com","Admin","pathfinderadmin248");
+        createAdminaccount(adminAccount);
+
         return httpSecurity.build();
     }
 
@@ -81,16 +90,24 @@ public class SecurityConfig {
         return new DefaultOAuth2UserService();
     }
 
+    public void createAdminaccount(MemberDto.AdminPost admin) {
+        Member adminMember = Member.createAdmin(admin);
+        memberRepository.save(adminMember);
+    }
+
     private Customizer<ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry> getAuthorizeRequestsCustomizer() {
         return (requests) -> requests
                 .antMatchers(HttpMethod.GET, "/").permitAll()
                 .antMatchers("/auth/**").permitAll()
-                .antMatchers(HttpMethod.GET, "/member/**").permitAll()
-                .antMatchers(HttpMethod.POST, "/member/email/**").permitAll()
-                .antMatchers(HttpMethod.GET, "/diary/**").permitAll()
+                .antMatchers("/member/**").permitAll()
+                .antMatchers("/diary/**").permitAll()
+                .antMatchers("/reward/**").permitAll()
+                .antMatchers(HttpMethod.GET,"/api/**").permitAll()
+                .antMatchers(HttpMethod.POST,"/image/**").permitAll()
+                .antMatchers(HttpMethod.DELETE,"/image/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/tag/**").permitAll()
+                .antMatchers(HttpMethod.POST, "/recommend/**").permitAll()
                 .antMatchers("/scrap/**").permitAll()
-                .antMatchers("/**").permitAll()
                 .anyRequest().authenticated();
     }
 

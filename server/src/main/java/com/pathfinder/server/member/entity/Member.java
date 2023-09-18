@@ -1,7 +1,10 @@
 package com.pathfinder.server.member.entity;
 
-import com.pathfinder.server.recommend.entity.Recommend;
 import com.pathfinder.server.diary.entity.Diary;
+import com.pathfinder.server.member.dto.MemberDto;
+import com.pathfinder.server.recommend.entity.Recommend;
+import com.pathfinder.server.reward.entity.Reward;
+import com.pathfinder.server.scrap.entity.Scrap;
 import lombok.*;
 
 import javax.persistence.*;
@@ -40,13 +43,29 @@ public class Member {
             "https://main20-pathfinder.s3.ap-northeast-2.amazonaws.com/profileimage.png";   // 기본 이미지
 
     @Column(nullable = false)
-    private Boolean agreeToTerms = false;
+    private int diaryCount;
+
+    @Column(nullable = false)
+    private Boolean agreeToTerms;   // todo 미동의 회원 사용불가 처리
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<Recommend> recommends = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<Diary> diaries = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<Reward> rewards = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<Scrap> scraps = new ArrayList<>();
+
+    public void setScrap(Scrap scrap) {
+        scraps.add(scrap);
+        if(scrap.getMember() != this) {
+            scrap.setMember(this);
+        }
+    }
 
     public void setRecommend(Recommend recommend) {
         recommends.add(recommend);
@@ -62,6 +81,13 @@ public class Member {
         }
     }
 
+    public void setReward(Reward reward) {
+        rewards.add(reward);
+        if(reward.getMember() != this) {
+            reward.setMember(this);
+        }
+    }
+
     // 일반 회원가입
     public static Member createMember(String email, String name, String password, boolean agreeToTerms) {
         return Member.builder()
@@ -71,6 +97,7 @@ public class Member {
                 .introduce("안녕하세요")
                 .authority(Authority.ROLE_USER)
                 .profileImageUrl("https://main20-pathfinder.s3.ap-northeast-2.amazonaws.com/profileimage.png")
+                .diaryCount(0)
                 .agreeToTerms(agreeToTerms)
                 .build();
     }
@@ -84,6 +111,20 @@ public class Member {
                 .introduce("안녕하세요")
                 .authority(Authority.ROLE_USER)
                 .profileImageUrl("https://main20-pathfinder.s3.ap-northeast-2.amazonaws.com/profileimage.png")
+                .diaryCount(0)
+                .agreeToTerms(true)
+                .build();
+    }
+
+    public static Member createAdmin(MemberDto.AdminPost admin){
+        return Member.builder()
+                .email(admin.getEmail())
+                .name(admin.getName())
+                .password(admin.getPassword())
+                .introduce("관리자 계정입니다.")
+                .authority(Authority.ROLE_ADMIN)
+                .profileImageUrl("https://main20-pathfinder.s3.ap-northeast-2.amazonaws.com/profileimage.png")
+                .diaryCount(0)
                 .agreeToTerms(true)
                 .build();
     }

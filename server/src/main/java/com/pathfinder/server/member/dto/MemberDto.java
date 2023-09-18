@@ -2,6 +2,7 @@ package com.pathfinder.server.member.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
@@ -21,13 +22,7 @@ public class MemberDto {
         private String password;
         @NotNull
         private Boolean agreeToTerms;
-        // todo 패스워드 vaild추가
-
-        public Post() {
-        }
     }
-
-
 
     @Getter
     @AllArgsConstructor
@@ -51,5 +46,18 @@ public class MemberDto {
         private String email;
         private String introduce;
         private String profileImageUrl;
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public static class AdminPost{
+        @NotNull
+        @Email
+        private String email;
+        @NotNull
+        private String name;
+        @NotNull
+        @Size(min = 15)
+        private String password;
     }
 }
