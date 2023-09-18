@@ -8,6 +8,9 @@ import com.pathfinder.server.global.exception.authexception.OAuthCodeRequestExce
 import com.pathfinder.server.global.exception.authexception.OAuthGithubRequestException;
 import com.pathfinder.server.member.entity.Member;
 import com.pathfinder.server.member.repository.MemberRepository;
+import com.pathfinder.server.reward.entity.Reward;
+import com.pathfinder.server.reward.repository.RewardRepository;
+import com.pathfinder.server.reward.service.RewardService;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.core.ParameterizedTypeReference;
@@ -49,17 +52,23 @@ public class OAuthService {
     private final TokenProvider tokenProvider;
     private final RestTemplate restTemplate;
     private final DefaultOAuth2UserService defaultOAuth2UserService;
+    private final RewardService rewardService;
+    private final RewardRepository rewardRepository;
 
     public OAuthService(InMemoryClientRegistrationRepository inMemoryRepository,
                         MemberRepository memberRepository,
                         TokenProvider tokenProvider,
                         RestTemplate restTemplate,
-                        DefaultOAuth2UserService defaultOAuth2UserService) {
+                        DefaultOAuth2UserService defaultOAuth2UserService,
+                        RewardService rewardService,
+                        RewardRepository rewardRepository) {
         this.inMemoryRepository = inMemoryRepository;
         this.memberRepository = memberRepository;
         this.tokenProvider = tokenProvider;
         this.restTemplate = restTemplate;
         this.defaultOAuth2UserService = defaultOAuth2UserService;
+        this.rewardService = rewardService;
+        this.rewardRepository = rewardRepository;
     }
 
 
@@ -176,6 +185,13 @@ public class OAuthService {
                 memberProfile.getEmail(),
                 memberProfile.getEmail().split("@")[0],
                 "oauthUser");
+
+        List<Reward> initialRewards = rewardService.createInitRewards(); // 초기 보상 리스트 생성
+        for (Reward reward : initialRewards) {
+            reward.setMember(member); // 각 보상에 해당 멤버 연결
+        }
+        rewardRepository.saveAll(initialRewards);
+
         return memberRepository.save(member);
     }
 

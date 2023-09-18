@@ -38,14 +38,15 @@ public class Member {
     private String introduce;
 
     @Column(nullable = false)
-    private String profileImageUrl =
-            "https://main20-pathfinder.s3.ap-northeast-2.amazonaws.com/profileimage.png";   // 기본 이미지
+    private String profileImageUrl;
 
     @Column(nullable = false)
     private int diaryCount;
 
     @Column(nullable = false)
-    private Boolean agreeToTerms;   // todo 미동의 회원 사용불가 처리
+    private Boolean agreeToTerms;   // todo batch로 미동의 회원 사용불가 처리
+
+    // todo 일정기간 미로그인자 휴면상태로 변경
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<Recommend> recommends = new ArrayList<>();
@@ -95,7 +96,7 @@ public class Member {
                 .password(password)
                 .introduce("안녕하세요")
                 .authority(Authority.ROLE_USER)
-                .profileImageUrl("https://main20-pathfinder.s3.ap-northeast-2.amazonaws.com/profileimage.png")
+                .profileImageUrl("https://main20-pathfinder.s3.ap-northeast-2.amazonaws.com/defaultImage.png")
                 .diaryCount(0)
                 .agreeToTerms(agreeToTerms)
                 .build();
@@ -109,7 +110,7 @@ public class Member {
                 .password(password)
                 .introduce("안녕하세요")
                 .authority(Authority.ROLE_USER)
-                .profileImageUrl("https://main20-pathfinder.s3.ap-northeast-2.amazonaws.com/profileimage.png")
+                .profileImageUrl("https://main20-pathfinder.s3.ap-northeast-2.amazonaws.com/defaultImage.png")
                 .diaryCount(0)
                 .agreeToTerms(true)
                 .build();

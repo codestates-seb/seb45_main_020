@@ -107,6 +107,7 @@ public class DiaryService {
     private void verifyDiaryGetMemberName(Diary diary){
         Member findUser = memberService.findVerifiedMember(diary.getMember().getMemberId());
         diary.setName(findUser.getName());
+        diary.setEmail(findUser.getEmail());
         findUser.setDiaryCount(findUser.getDiaryCount() + 1);
         rewardService.unlockRewards(findUser,findUser.getRewards());
     }

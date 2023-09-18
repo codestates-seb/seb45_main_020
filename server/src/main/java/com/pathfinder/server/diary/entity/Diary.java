@@ -27,11 +27,14 @@ public class Diary {
     @Column(length = 100, nullable = false)
     private String title;
 
-    @Column(nullable = false)
+    @Column(length = 65535, nullable = false)
     private String content;
 
     @Column(nullable = false)
     private String name;
+
+    @Column(nullable = false)
+    private String email;
 
     @Column(nullable = false)
     private String area1; // 도

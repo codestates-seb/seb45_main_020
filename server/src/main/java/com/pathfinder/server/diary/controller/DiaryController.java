@@ -9,10 +9,13 @@ import com.pathfinder.server.dto.MultiResponseDto;
 import com.pathfinder.server.dto.SingleResponseDto;
 import com.pathfinder.server.recommend.entity.Recommend;
 import com.pathfinder.server.recommend.repository.RecommendRepository;
+import com.pathfinder.server.scrap.entity.Scrap;
+import com.pathfinder.server.scrap.repository.ScrapRepository;
 import com.pathfinder.server.utils.UriCreator;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.Positive;
@@ -27,11 +30,13 @@ public class DiaryController {
     private DiaryService diaryService;
     private DiaryMapper mapper;
     private final RecommendRepository recommendRepository;
+    private final ScrapRepository scrapRepository;
 
-    public DiaryController(DiaryService diaryService, DiaryMapper mapper, RecommendRepository recommendRepository) {
+    public DiaryController(DiaryService diaryService, DiaryMapper mapper, RecommendRepository recommendRepository, ScrapRepository scrapRepository) {
         this.diaryService = diaryService;
         this.mapper = mapper;
         this.recommendRepository = recommendRepository;
+        this.scrapRepository = scrapRepository;
     }
 
     @PostMapping("/registration") // 게시글 생성
@@ -50,6 +55,8 @@ public class DiaryController {
         DiaryDto.Response response = mapper.DiaryToDiaryResponseDto(diary);
         Optional<Recommend> optionalRecommend = recommendRepository.findByMemberMemberIdAndDiaryDiaryId(SecurityUtil.getCurrentId(), diaryId);
         response.setRecommend(optionalRecommend.isPresent());
+        Optional<Scrap> optionalScrap = scrapRepository.findByMemberMemberIdAndDiaryDiaryId(SecurityUtil.getCurrentId(),diaryId);
+        response.setScrap(optionalScrap.isPresent());
         return new ResponseEntity<>(
                 new SingleResponseDto<>(response),
                 HttpStatus.OK);

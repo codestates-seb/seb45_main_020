@@ -34,6 +34,7 @@ public class DiaryDto {
     public static class Response {
         private Long diaryId;
         private String name;
+        private String email;
         private String title;
         private String content;
         private String area1;
@@ -44,6 +45,11 @@ public class DiaryDto {
         private LocalDateTime createdAt;
         private LocalDateTime modifiedAt;
         private boolean isRecommend;
+        private boolean isScrap;
+
+        public void setScrap(boolean isScrap) {
+            this.isScrap = isScrap;
+        }
         public void setRecommend(boolean isRecommend) {
             this.isRecommend = isRecommend;
         }

@@ -30,7 +30,7 @@ public class ScrapController {
 
     @PostMapping //게시글 스크랩 하기
     public ResponseEntity postScrap(@RequestBody ScrapDto.Post scrapPostDto){
-        Scrap scrap = scrapService.createScrap(mapper.scarpPostDtoToScrap(scrapPostDto));
+        scrapService.createScrap(mapper.scarpPostDtoToScrap(scrapPostDto));
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

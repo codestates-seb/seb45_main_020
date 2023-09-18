@@ -11,7 +11,10 @@ import com.pathfinder.server.scrap.repository.ScrapRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class ScrapService {
@@ -26,16 +29,17 @@ public class ScrapService {
         this.memberService = memberService;
     }
 
-    public Scrap createScrap(Scrap scrap) {
+    public void createScrap(Scrap scrap) {
         Diary findDiary = diaryService.findVerifiedDiary(scrap.getDiary().getDiaryId());
         memberService.findMember(scrap.getMember().getMemberId());
-
-        if(!scrapRepository.findByMemberMemberIdAndDiaryDiaryId(scrap.getMember().getMemberId(),scrap.getDiary().getDiaryId()).isPresent()) {
+        Optional<Scrap> optionalScrap = scrapRepository.findByMemberMemberIdAndDiaryDiaryId(scrap.getMember().getMemberId(),scrap.getDiary().getDiaryId());
+        if(!optionalScrap.isPresent()) {
             findDiary.setScrapCount(findDiary.getScrapCount() + 1);
-            return scrapRepository.save(scrap);
+            scrapRepository.save(scrap);
         }
         else {
-            throw new AlreadyScrapException();
+            findDiary.setScrapCount(findDiary.getScrapCount() - 1);
+            scrapRepository.delete(optionalScrap.get());
         }
     }
 
