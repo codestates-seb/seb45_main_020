@@ -258,6 +258,7 @@ const AlArea = styled.div`
   top: calc(50% - 170px);
   animation: ${Bounce} 5s infinite;
   z-index: 2;
+  cursor: pointer;
 `;
 
 const Area = styled.div`

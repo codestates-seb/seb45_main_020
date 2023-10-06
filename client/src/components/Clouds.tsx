@@ -57,8 +57,8 @@ const CloudBox = styled.div`
       position: absolute;
       left: 100px;
       bottom: -100px;
-      width: 80px;
-      height: 80px;
+      width: 81px;
+      height: 81px;
       background: url(${Lightning}) no-repeat center / contain;
       transform: rotate(19deg);
     }
