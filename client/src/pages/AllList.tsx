@@ -19,6 +19,6 @@ const AllListCon = styled.main`
   justify-content: center;
   .title {
     width: 1135px;
-    margin: 10px 0;
+    margin: 10px 0px;
   }
 `;
