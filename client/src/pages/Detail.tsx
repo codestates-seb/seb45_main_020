@@ -178,7 +178,7 @@ const Detail = (): JSX.Element => {
             </DetailBtnContainer>
           </DetailMainContent>
         </DetailContentContainer>
-        <Comment />
+        <Comment id={params.id} />
       </DetailBg>
     </>
   );
