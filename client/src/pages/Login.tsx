@@ -101,7 +101,6 @@ const Login = (): JSX.Element => {
               type={isHidePassword ? "password" : "text"}
               {...register("password", {
                 required: "비밀번호를 입력해주세요.",
-                minLength: { value: 8, message: "8자리 이상의 비밀번호를 사용해주세요." },
               })}
             ></input>
             {isHidePassword ? (

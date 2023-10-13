@@ -12,6 +12,7 @@ import eye from "../assets/images/eye-icon.png";
 import thumbUpWhite from "../assets/images/thumb-up-icon-white.png";
 import Loading from "../components/common/Loading";
 import SubWave from "../components/common/SubWave";
+import Comment from "../components/Comment";
 
 const Detail = (): JSX.Element => {
   const navigate = useNavigate();
@@ -177,6 +178,7 @@ const Detail = (): JSX.Element => {
             </DetailBtnContainer>
           </DetailMainContent>
         </DetailContentContainer>
+        <Comment />
       </DetailBg>
     </>
   );
