@@ -2,6 +2,9 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { styled } from "styled-components";
 import { usePagination } from "../hooks/usePagination";
+import { getAccessToken } from "../util/auth";
+import edit from "../assets/images/edit-white.png";
+import trash from "../assets/images/trash.png";
 
 type Props = {
   id: string | undefined;
@@ -18,28 +21,80 @@ type Comment = {
 const Comment = ({ id }: Props): JSX.Element => {
   const [commentData, setCommentData] = useState<(Comment | null)[]>([]);
   const [commentNum, setCommentNum] = useState<number>(0);
+  const [commentTextarea, setCommentTextarea] = useState<string>("");
   const {
     currentPage,
-    totalPages,
-    setTotalPages,
-    onPageChangeHandler,
-    onPrevPageHandler,
-    onNextPageHandler,
+    // totalPages,
+    // setTotalPages,
+    // onPageChangeHandler,
+    // onPrevPageHandler,
+    // onNextPageHandler,
   } = usePagination();
 
-  useEffect(() => {
+  type Headers = Record<string, string>;
+  const headers: Headers = {};
+  const token = getAccessToken();
+  if (token) {
+    headers["Authorization"] = `${token}`;
+  }
+
+  function getCommentData() {
     axios
       .get(
         `http://ec2-43-202-120-133.ap-northeast-2.compute.amazonaws.com:8080/comment/diary/${id}?page=${currentPage}`,
       )
       .then((res) => {
-        setCommentData(res.data.data);
+        setCommentData(res.data.data.reverse());
         setCommentNum(res.data.data.length);
       })
       .catch((err) => {
         console.log(err);
       });
+  }
+
+  useEffect(() => {
+    getCommentData();
   }, []);
+
+  function handleCommentSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const formData = Object.fromEntries(new FormData(e.currentTarget));
+
+    if (formData.content === "") {
+      alert("댓글의 내용을 입력해주세요.");
+      return;
+    }
+
+    axios
+      .post(`http://ec2-43-202-120-133.ap-northeast-2.compute.amazonaws.com:8080/comment`, {
+        diaryId: id,
+        memberId: localStorage.getItem("memberId"),
+        content: formData.content,
+      })
+      .then(() => {
+        getCommentData();
+        setCommentTextarea("");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+
+  function handleCommentDelete(id: number | undefined) {
+    if (window.confirm("댓글을 삭제하시겠습니까?")) {
+      axios
+        .delete(
+          `http://ec2-43-202-120-133.ap-northeast-2.compute.amazonaws.com:8080/comment/${id}`,
+          {
+            headers,
+          },
+        )
+        .then(() => {
+          getCommentData();
+        })
+        .catch((err) => console.log(err));
+    }
+  }
 
   return (
     <CommentCon>
@@ -49,16 +104,36 @@ const Comment = ({ id }: Props): JSX.Element => {
           return (
             <CommentSection key={el?.commentId}>
               <CommentTop>
-                <CommentAuthor>{el?.name}</CommentAuthor>
-                <CommentTime>{el?.createdAt.slice(0, 10).replace(/-/g, "/")}</CommentTime>
+                <CommentInfo>
+                  <CommentAuthor>{el?.name}</CommentAuthor>
+                  <CommentTime>{el?.createdAt.slice(0, 10).replace(/-/g, "/")}</CommentTime>
+                </CommentInfo>
+                <CommentBtnCon>
+                  <CommentBtn className="comment_edit">
+                    <img src={edit} className="comment_edit_img" />
+                  </CommentBtn>
+                  <CommentBtn
+                    className="comment_delete"
+                    onClick={() => handleCommentDelete(el?.commentId)}
+                  >
+                    <img src={trash} className="comment_delete_img" />
+                  </CommentBtn>
+                </CommentBtnCon>
               </CommentTop>
               <CommentContent>{el?.content}</CommentContent>
             </CommentSection>
           );
         })}
       </CommentArea>
-      <CommentForm>
-        <textarea placeholder="댓글을 입력해주세요."></textarea>
+      <CommentForm onSubmit={(e) => handleCommentSubmit(e)}>
+        <textarea
+          placeholder="댓글을 입력해주세요."
+          name="content"
+          value={commentTextarea}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+            setCommentTextarea(e.target.value)
+          }
+        ></textarea>
         <button>댓글 작성</button>
       </CommentForm>
     </CommentCon>
@@ -109,6 +184,7 @@ const CommentForm = styled.form`
     background-color: #1a298e;
     border-radius: 4px;
     margin-top: 18px;
+    cursor: pointer;
   }
 `;
 
@@ -123,6 +199,12 @@ const CommentSection = styled.li`
 `;
 
 const CommentTop = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+`;
+
+const CommentInfo = styled.div`
   display: flex;
   flex-direction: column;
   margin-bottom: 20px;
@@ -138,6 +220,39 @@ const CommentTime = styled.span`
   color: #616161;
   font-size: 12px;
   font-weight: 400;
+`;
+
+const CommentBtnCon = styled.div`
+  display: flex;
+  gap: 5px;
+`;
+
+const CommentBtn = styled.div`
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+
+  .comment_edit {
+    background-color: #ffc03f;
+  }
+
+  .comment_delete {
+    background-color: #f36c68;
+  }
+
+  .comment_edit_img {
+    width: 18px;
+    height: 19px;
+  }
+
+  .comment_delete_img {
+    width: 25px;
+    height: 25px;
+  }
 `;
 
 const CommentContent = styled.div`
