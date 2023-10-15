@@ -18,10 +18,17 @@ type Comment = {
   modifiedAt: string;
 };
 
+type EditComment = {
+  state: boolean;
+  commentId: number | undefined | null;
+};
+
 const Comment = ({ id }: Props): JSX.Element => {
   const [commentData, setCommentData] = useState<(Comment | null)[]>([]);
   const [commentNum, setCommentNum] = useState<number>(0);
   const [commentTextarea, setCommentTextarea] = useState<string>("");
+  const [isEdit, setIsEdit] = useState<EditComment>({ state: false, commentId: null });
+  const [editComment, setEditComment] = useState<string | undefined>("");
   const {
     currentPage,
     // totalPages,
@@ -38,7 +45,7 @@ const Comment = ({ id }: Props): JSX.Element => {
     headers["Authorization"] = `${token}`;
   }
 
-  function getCommentData() {
+  function getCommentData(): void {
     axios
       .get(
         `http://ec2-43-202-120-133.ap-northeast-2.compute.amazonaws.com:8080/comment/diary/${id}?page=${currentPage}`,
@@ -56,7 +63,7 @@ const Comment = ({ id }: Props): JSX.Element => {
     getCommentData();
   }, []);
 
-  function handleCommentSubmit(e: React.FormEvent<HTMLFormElement>) {
+  function handleCommentSubmit(e: React.FormEvent<HTMLFormElement>): void {
     e.preventDefault();
     const formData = Object.fromEntries(new FormData(e.currentTarget));
 
@@ -80,7 +87,33 @@ const Comment = ({ id }: Props): JSX.Element => {
       });
   }
 
-  function handleCommentDelete(id: number | undefined) {
+  function handleCommentEdit(id: number | undefined, content: string | undefined): void {
+    setIsEdit({ state: true, commentId: id });
+    setEditComment(content);
+  }
+
+  function cancelCommentEdit(): void {
+    setIsEdit({ state: false, commentId: null });
+    setEditComment("");
+  }
+
+  function handleEditComment(id: number | undefined): void {
+    axios
+      .patch(
+        `http://ec2-43-202-120-133.ap-northeast-2.compute.amazonaws.com:8080/comment/${id}`,
+        { content: editComment },
+        {
+          headers,
+        },
+      )
+      .then(() => {
+        cancelCommentEdit();
+        getCommentData();
+      })
+      .catch((err) => console.log(err));
+  }
+
+  function handleCommentDelete(id: number | undefined): void {
     if (window.confirm("댓글을 삭제하시겠습니까?")) {
       axios
         .delete(
@@ -103,24 +136,49 @@ const Comment = ({ id }: Props): JSX.Element => {
         {commentData.map((el: Comment | null) => {
           return (
             <CommentSection key={el?.commentId}>
-              <CommentTop>
-                <CommentInfo>
-                  <CommentAuthor>{el?.name}</CommentAuthor>
-                  <CommentTime>{el?.createdAt.slice(0, 10).replace(/-/g, "/")}</CommentTime>
-                </CommentInfo>
-                <CommentBtnCon>
-                  <CommentBtn className="comment_edit">
-                    <img src={edit} className="comment_edit_img" />
-                  </CommentBtn>
-                  <CommentBtn
-                    className="comment_delete"
-                    onClick={() => handleCommentDelete(el?.commentId)}
-                  >
-                    <img src={trash} className="comment_delete_img" />
-                  </CommentBtn>
-                </CommentBtnCon>
-              </CommentTop>
-              <CommentContent>{el?.content}</CommentContent>
+              {isEdit.state && isEdit.commentId === el?.commentId ? (
+                <>
+                  <CommentEditInput
+                    value={editComment}
+                    onChange={(e) => setEditComment(e.target.value)}
+                  ></CommentEditInput>
+                  <CommentEditBtnCon>
+                    <CommentEditBtn className="comment_cancel" onClick={cancelCommentEdit}>
+                      취소
+                    </CommentEditBtn>
+                    <CommentEditBtn
+                      className="comment_edit"
+                      onClick={() => handleEditComment(el?.commentId)}
+                    >
+                      수정
+                    </CommentEditBtn>
+                  </CommentEditBtnCon>
+                </>
+              ) : (
+                <>
+                  <CommentTop>
+                    <CommentInfo>
+                      <CommentAuthor>{el?.name}</CommentAuthor>
+                      <CommentTime>{el?.createdAt.slice(0, 10).replace(/-/g, "/")}</CommentTime>
+                    </CommentInfo>
+                    <CommentBtnCon>
+                      <CommentBtn
+                        className="comment_edit"
+                        onClick={() => handleCommentEdit(el?.commentId, el?.content)}
+                      >
+                        <img src={edit} className="comment_edit_img" />
+                      </CommentBtn>
+                      <CommentBtn
+                        className="comment_delete"
+                        onClick={() => handleCommentDelete(el?.commentId)}
+                      >
+                        <img src={trash} className="comment_delete_img" />
+                      </CommentBtn>
+                    </CommentBtnCon>
+                  </CommentTop>
+                  <CommentContent>{el?.content}</CommentContent>
+                </>
+              )}
             </CommentSection>
           );
         })}
@@ -198,6 +256,16 @@ const CommentSection = styled.li`
   padding: 20px 0;
 `;
 
+const CommentEditInput = styled.textarea`
+  width: 100%;
+  height: 100px;
+  padding: 15px 18px;
+  box-shadow: 0 0 0 1px #bebebe inset;
+  border-radius: 4px;
+  box-sizing: border-box;
+  resize: none;
+`;
+
 const CommentTop = styled.div`
   width: 100%;
   display: flex;
@@ -225,6 +293,23 @@ const CommentTime = styled.span`
 const CommentBtnCon = styled.div`
   display: flex;
   gap: 5px;
+
+  .comment_edit {
+    background-color: #ffc03f;
+  }
+
+  .comment_delete {
+    background-color: #f36c68;
+  }
+
+  .comment_cancel {
+    background-color: #bebebe;
+  }
+`;
+
+const CommentEditBtnCon = styled(CommentBtnCon)`
+  width: 100%;
+  justify-content: flex-end;
 `;
 
 const CommentBtn = styled.div`
@@ -236,14 +321,6 @@ const CommentBtn = styled.div`
   align-items: center;
   cursor: pointer;
 
-  .comment_edit {
-    background-color: #ffc03f;
-  }
-
-  .comment_delete {
-    background-color: #f36c68;
-  }
-
   .comment_edit_img {
     width: 18px;
     height: 19px;
@@ -253,6 +330,13 @@ const CommentBtn = styled.div`
     width: 25px;
     height: 25px;
   }
+`;
+
+const CommentEditBtn = styled(CommentBtn)`
+  width: 80px;
+  margin-top: 10px;
+  color: #ffffff;
+  font-weight: 600;
 `;
 
 const CommentContent = styled.div`
