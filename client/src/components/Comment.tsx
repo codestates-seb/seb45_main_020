@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { styled } from "styled-components";
 import { usePagination } from "../hooks/usePagination";
 import { getAccessToken } from "../util/auth";
+import Pagination from "./common/Pagenation";
 import edit from "../assets/images/edit-white.png";
 import trash from "../assets/images/trash.png";
 
@@ -31,11 +32,11 @@ const Comment = ({ id }: Props): JSX.Element => {
   const [editComment, setEditComment] = useState<string | undefined>("");
   const {
     currentPage,
-    // totalPages,
-    // setTotalPages,
-    // onPageChangeHandler,
-    // onPrevPageHandler,
-    // onNextPageHandler,
+    totalPages,
+    setTotalPages,
+    onPageChangeHandler,
+    onPrevPageHandler,
+    onNextPageHandler,
   } = usePagination();
 
   type Headers = Record<string, string>;
@@ -51,8 +52,9 @@ const Comment = ({ id }: Props): JSX.Element => {
         `http://ec2-43-202-120-133.ap-northeast-2.compute.amazonaws.com:8080/comment/diary/${id}?page=${currentPage}`,
       )
       .then((res) => {
-        setCommentData(res.data.data.reverse());
+        setCommentData(res.data.data);
         setCommentNum(res.data.data.length);
+        setTotalPages(res.data.pageInfo.totalPages);
       })
       .catch((err) => {
         console.log(err);
@@ -61,7 +63,7 @@ const Comment = ({ id }: Props): JSX.Element => {
 
   useEffect(() => {
     getCommentData();
-  }, []);
+  }, [currentPage]);
 
   function handleCommentSubmit(e: React.FormEvent<HTMLFormElement>): void {
     e.preventDefault();
@@ -110,7 +112,7 @@ const Comment = ({ id }: Props): JSX.Element => {
         cancelCommentEdit();
         getCommentData();
       })
-      .catch((err) => console.log(err));
+      .catch(() => alert("수정 권한이 없습니다."));
   }
 
   function handleCommentDelete(id: number | undefined): void {
@@ -182,6 +184,13 @@ const Comment = ({ id }: Props): JSX.Element => {
             </CommentSection>
           );
         })}
+        <Pagination
+          currentPage={currentPage}
+          onPrevPage={onPrevPageHandler}
+          totalPages={totalPages}
+          onPageChange={onPageChangeHandler}
+          onNextPage={onNextPageHandler}
+        />
       </CommentArea>
       <CommentForm onSubmit={(e) => handleCommentSubmit(e)}>
         <textarea
@@ -213,8 +222,8 @@ const CommentCon = styled.div`
 const CommentTitle = styled.div`
   font-size: 22px;
   font-weight: 600;
-  padding-left: 5px;
-  margin-bottom: 16px;
+  padding: 0 5px 16px 0;
+  border-bottom: 1px solid #eaeaea;
 `;
 
 const CommentForm = styled.form`
@@ -222,8 +231,6 @@ const CommentForm = styled.form`
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  border-top: 1px solid #eaeaea;
-  padding-top: 20px;
 
   textarea {
     width: 100%;
@@ -248,11 +255,10 @@ const CommentForm = styled.form`
 
 const CommentArea = styled.ul`
   width: 100%;
-  margin-top: 20px;
 `;
 
 const CommentSection = styled.li`
-  border-top: 1px solid #eaeaea;
+  border-bottom: 1px solid #eaeaea;
   padding: 20px 0;
 `;
 
